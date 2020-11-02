@@ -45,24 +45,28 @@ data class GradleBuildDsl(
             this.gradleCommandBat(command, additionalBuildArgs.strDouble())
 
     fun DslContext<Step>.gradleCommandSh(command: String, additionalBuildArgs: Var.Literal.Str) =
-            withEnv(mapOf("GRADLE_USER_HOME" to "${"WORKSPACE".environmentVar()}/.gradle-home-tmp")) { artifactoryAuthenticated {
-                sh(("./gradlew --no-daemon --stacktrace --build-cache " +
-                        (gradleCredentials?.let { "-D$gradleUserProperty=\\\"\\\${${it.usernameVariable.value}}\\\" -D$gradlePasswordProperty=\\\"\\\${${it.passwordVariable.value}}\\\" " } ?: "") +
+            artifactoryAuthenticated {
+                sh(("./gradlew --stacktrace --build-cache " +
+                        (gradleCredentials?.let { "-D$gradleUserProperty=\\\"\\\${${it.usernameVariable.value}}\\\" -D$gradlePasswordProperty=\\\"\\\${${it.passwordVariable.value}}\\\" " }
+                                ?: "") +
                         "$additionalBuildArgs $command").strDouble())
-            } }
+            }
 
     fun DslContext<Step>.gradleCommandBat(command: String, additionalBuildArgs: Var.Literal.Str) =
-            withEnv(mapOf("GRADLE_USER_HOME" to "${"WORKSPACE".environmentVar()}/.gradle-home-tmp")) { artifactoryAuthenticated {
-                bat(("call gradlew.bat --no-daemon --stacktrace --build-cache " +
-                        (gradleCredentials?.let { "-D$gradleUserProperty=%${it.usernameVariable.value}% -D$gradlePasswordProperty=%${it.passwordVariable.value}% " } ?: "") +
-                        "$additionalBuildArgs $command").strDouble())
-            } }
+            withEnv(mapOf("GRADLE_USER_HOME" to "${"WORKSPACE".environmentVar()}/.gradle-home-tmp")) {
+                artifactoryAuthenticated {
+                    bat(("call gradlew.bat --no-daemon --stacktrace --build-cache " +
+                            (gradleCredentials?.let { "-D$gradleUserProperty=%${it.usernameVariable.value}% -D$gradlePasswordProperty=%${it.passwordVariable.value}% " }
+                                    ?: "") +
+                            "$additionalBuildArgs $command").strDouble())
+                }
+            }
 
     fun DslContext<Step>.gradleCommandMultiPlatform(command: String, additionalBuildArgs: Var.Literal.Str, booleanStatement: BooleanStatement = "PATH".environmentVar().containsSubstring("C:".strSingle())) =
             condition({ booleanStatement },
-                        { gradleCommandBat(command, additionalBuildArgs) },
-                        { gradleCommandSh(command, additionalBuildArgs) })
+                    { gradleCommandBat(command, additionalBuildArgs) },
+                    { gradleCommandSh(command, additionalBuildArgs) })
 
     private fun DslContext<Step>.artifactoryAuthenticated(steps: DslContext<Step>.() -> Unit) =
-        gradleCredentials?.let { withCredentials(it, steps) } ?: steps()
+            gradleCredentials?.let { withCredentials(it, steps) } ?: steps()
 }
