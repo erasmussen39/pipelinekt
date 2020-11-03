@@ -46,7 +46,7 @@ data class GradleBuildDsl(
 
     fun DslContext<Step>.gradleCommandSh(command: String, additionalBuildArgs: Var.Literal.Str) =
             artifactoryAuthenticated {
-                sh(("./gradlew --stacktrace --build-cache " +
+                sh(("./gradlew --no-daemon --stacktrace --build-cache " +
                         (gradleCredentials?.let { "-D$gradleUserProperty=\\\"\\\${${it.usernameVariable.value}}\\\" -D$gradlePasswordProperty=\\\"\\\${${it.passwordVariable.value}}\\\" " }
                                 ?: "") +
                         "$additionalBuildArgs $command").strDouble())
