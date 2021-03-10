@@ -3,10 +3,10 @@ package com.code42.jenkins.pipelinekt.core.secrets
 import com.code42.jenkins.pipelinekt.core.vars.Var
 
 data class VaultSecret(
-    val path: Var,
-    val engineVersion: Var,
-    val envVar: Var,
-    val vaultKey: Var
+    val path: String,
+    val engineVersion: String,
+    val envVar: String,
+    val vaultKey: String
 ) :
     VaultSecrets {
     override fun toGroovy(): String {
