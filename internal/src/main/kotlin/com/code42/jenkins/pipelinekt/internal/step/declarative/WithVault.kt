@@ -14,8 +14,6 @@ import com.code42.jenkins.pipelinekt.core.writer.GroovyWriter
  */
 data class WithVault(val secrets: Secrets, override val steps: Step) : DeclarativeStep, NestedStep {
     override fun toGroovy(writer: GroovyWriter) {
-        writer.closure(
-            listOf("withVault([") + secrets.toGroovy() + "])",
-            steps::toGroovy)
+        writer.closure(listOf("withVault([") + secrets.toGroovy() + "])", steps::toGroovy)
     }
 }

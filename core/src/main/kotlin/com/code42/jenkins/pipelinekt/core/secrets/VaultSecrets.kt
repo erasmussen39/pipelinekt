@@ -7,14 +7,16 @@ data class VaultSecrets(
 ) :
     Secrets {
     override fun toGroovy(): String {
-        val builder = StringBuilder("vaultSecrets: [[path: '$path', engineVersion: $engineVersion, secretValues: [")
+        val builder = StringBuilder()
+        builder.appendln("    vaultSecrets: [[path: '$path', engineVersion: $engineVersion, secretValues: [")
         val listIterator = secrets.listIterator()
         while (listIterator.hasNext()) {
-            builder.appendln("    " + listIterator.next().toGroovy())
-            if (listIterator.hasNext())
-                builder.append(",")
+            builder.appendln(
+                "        " + listIterator.next().toGroovy() +
+                        (if (listIterator.hasNext()) "," else "")
+            )
         }
-        builder.appendln("]]]")
+        builder.appendln("    ]]]")
         return builder.toString()
     }
 }
