@@ -19,8 +19,9 @@ data class WrapPass(val secrets: List<String>, override val steps: Step) : Decla
         val listIterator = secrets.listIterator()
         body.appendln("wrap([\$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [")
         while (listIterator.hasNext()) {
+            val secretValue = listIterator.next()
             body.appendln(
-                "    [password: " + listIterator.next() + "]" +
+                "    [var: '$secretValue', password: '\${$secretValue}']" +
                         (if (listIterator.hasNext()) "," else "")
             )
         }
