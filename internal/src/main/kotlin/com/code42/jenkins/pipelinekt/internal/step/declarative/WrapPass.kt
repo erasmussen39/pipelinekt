@@ -13,18 +13,18 @@ import com.code42.jenkins.pipelinekt.core.writer.GroovyWriter
  */
 data class WrapPass(val secrets: List<String>, override val steps: Step) : DeclarativeStep, NestedStep {
     override fun toGroovy(writer: GroovyWriter) {
-        //wrap([$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [[password: URL]]]) {
+        // wrap([$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [[password: URL]]]) {
 
         val body = StringBuilder()
         val listIterator = secrets.listIterator()
-        body.appendln("    wrap([\$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [")
+        body.appendln("wrap([\$class: 'MaskPasswordsBuildWrapper', varPasswordPairs: [")
         while (listIterator.hasNext()) {
             body.appendln(
-                "        [password: " + listIterator.next() + "]" +
+                "    [password: " + listIterator.next() + "]" +
                         (if (listIterator.hasNext()) "," else "")
             )
         }
-        body.appendln("    ])")
+        body.appendln("]])")
         writer.closure(body.toString(), steps::toGroovy)
     }
 }
