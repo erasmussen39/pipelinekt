@@ -8,10 +8,7 @@ import com.code42.jenkins.pipelinekt.core.Post
 import com.code42.jenkins.pipelinekt.core.StageOption
 import com.code42.jenkins.pipelinekt.core.stage.Stage
 import com.code42.jenkins.pipelinekt.core.step.Step
-import com.code42.jenkins.pipelinekt.core.vars.ext.strDouble
-import com.code42.jenkins.pipelinekt.core.vars.ext.strSingle
 import com.code42.jenkins.pipelinekt.core.writer.ext.toStep
-import com.code42.jenkins.pipelinekt.dsl.environment.envVar
 import com.code42.jenkins.pipelinekt.dsl.method.MethodDsl
 import com.code42.jenkins.pipelinekt.dsl.method.PipelineMethodRegistry
 import com.code42.jenkins.pipelinekt.dsl.option.ansiColor
@@ -38,9 +35,7 @@ fun <T, Dsl : MethodDsl> Dsl.withConfigurationContext(applyConfiguration: Dsl.()
 }
 
 data class PipelineDsl(
-    val defaultEnvironment: DslContext<Environment>.() -> Unit = {
-        envVar("DOCKER_CONFIG".strSingle(), "$\\{WORKSPACE}/.docker".strDouble())
-    },
+    val defaultEnvironment: DslContext<Environment>.() -> Unit = {},
     val defaultBuildOptions: DslContext<Option>.() -> Unit = {
         buildDiscarder(logRotator(10, 10, 10, 10))
         ansiColor("xterm")
