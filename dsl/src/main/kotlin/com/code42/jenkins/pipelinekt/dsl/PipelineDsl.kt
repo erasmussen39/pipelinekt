@@ -1,13 +1,17 @@
 package com.code42.jenkins.pipelinekt.dsl
 
 import com.code42.jenkins.pipelinekt.core.Agent
+import com.code42.jenkins.pipelinekt.core.Environment
 import com.code42.jenkins.pipelinekt.core.Option
 import com.code42.jenkins.pipelinekt.core.Pipeline
 import com.code42.jenkins.pipelinekt.core.Post
 import com.code42.jenkins.pipelinekt.core.StageOption
 import com.code42.jenkins.pipelinekt.core.stage.Stage
 import com.code42.jenkins.pipelinekt.core.step.Step
+import com.code42.jenkins.pipelinekt.core.vars.ext.strDouble
+import com.code42.jenkins.pipelinekt.core.vars.ext.strSingle
 import com.code42.jenkins.pipelinekt.core.writer.ext.toStep
+import com.code42.jenkins.pipelinekt.dsl.environment.envVar
 import com.code42.jenkins.pipelinekt.dsl.method.MethodDsl
 import com.code42.jenkins.pipelinekt.dsl.method.PipelineMethodRegistry
 import com.code42.jenkins.pipelinekt.dsl.option.ansiColor
@@ -34,6 +38,9 @@ fun <T, Dsl : MethodDsl> Dsl.withConfigurationContext(applyConfiguration: Dsl.()
 }
 
 data class PipelineDsl(
+    val defaultEnvironment: DslContext<Environment>.() -> Unit = {
+        envVar("DOCKER_CONFIG".strSingle(), "$\\{WORKSPACE}/.docker".strDouble())
+    },
     val defaultBuildOptions: DslContext<Option>.() -> Unit = {
         buildDiscarder(logRotator(10, 10, 10, 10))
         ansiColor("xterm")
@@ -66,6 +73,10 @@ data class PipelineDsl(
     val stages: Deque<Stage> = LinkedBlockingDeque()
 ) : MethodDsl {
 
+    fun DslContext<Environment>.defaultEnvirontment() {
+        defaultEnvironment.invoke(this)
+    }
+
     fun DslContext<Option>.defaultBuildOptions() {
         defaultBuildOptions.invoke(this)
     }
@@ -97,7 +108,7 @@ data class PipelineDsl(
         context.pipelineBlock()
 
         val pipeline = Pipeline(
-            environment = context.environmentContext.drainAll(),
+            environment = applyDefaultEnvironment(context.environmentContext.drainAll()),
             agent = context.agentContext.drainAll().firstOrNull() ?: SingletonDslContext.into(defaultAgent),
             tools = context.toolContext.drainAll(),
             parameters = context.parametersContext.drainAll(),
@@ -182,6 +193,13 @@ data class PipelineDsl(
         val afterPost = afterPostContext.toPost()
 
         return beforePost.merge(post).merge(afterPost)
+    }
+
+    private fun applyDefaultEnvironment(environment: List<Environment>): List<Environment> {
+        val defaultEnvironment = DslContext
+            .into<Environment> { defaultEnvirontment() }
+            .filter { defaultEnvironment -> environment.none { it.javaClass == defaultEnvironment.javaClass } }
+        return defaultEnvironment + environment
     }
 
     private fun applyDefaultPipelineOptions(options: List<Option>): List<Option> {
