@@ -47,7 +47,11 @@ data class PipelineContext(
         agentContext.agentBlock()
     }
 
-    fun post(postBlocck: PostContext.() -> Unit) {
-        postContext.postBlocck()
+    fun post(postBlock: PostContext.() -> Unit) {
+        postContext.postBlock()
+    }
+
+    fun environment(environmentBlock: DslContext<Environment>.() -> Unit) {
+        environmentContext.environmentBlock()
     }
 }
